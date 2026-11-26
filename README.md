@@ -7,10 +7,12 @@ Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
 ## Functies
 
 - Uurprijzen voor **vandaag** en **morgen** (tabbladen), all-in inclusief btw.
-- Staafdiagram van alle uren, kleurschaal van groen (goedkoop) naar rood (duur).
+- Staafdiagram van alle uren met **y-as schaal** (rasterlijnen in €/kWh) en een
+  kleurschaal van groen (goedkoop) naar rood (duur).
 - Actuele uur gemarkeerd met **nu**.
+- **Slider (2–8 uur)** waarmee de duur van het te zoeken blok ingesteld wordt.
 - Samenvattingskaarten: gemiddelde, laagste uur, hoogste uur en het
-  **goedkoopste 4-uurs blok** (start, eind en gemiddelde prijs) — handig om
+  **goedkoopste blok** (start, eind en gemiddelde prijs) — handig om
   bijv. de wasmachine, vaatwasser of laadpaal in te plannen.
 - Duidelijke melding als de prijzen van morgen nog niet gepubliceerd zijn.
 
@@ -41,7 +43,8 @@ De pagina kan ook direct gehost worden, bijvoorbeeld via GitHub Pages.
   zomer- en wintertijd; het API-venster loopt van lokale middernacht vandaag
   tot lokale middernacht overmorgen.
 - De prijzen worden per lokale dag gegroepeerd; het goedkoopste blok is een
-  schuivend venster van 4 aaneengesloten uren met het laagste gemiddelde.
+  schuivend venster van aaneengesloten uren (stelbaar via de slider) met het
+  laagste gemiddelde.
 
 ## Ontwikkelen
 

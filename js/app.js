@@ -7,17 +7,19 @@ import {
   groupByDay,
   hourLabel,
   localDateKey,
+  niceScale,
   zonedTimeToUtcMs,
-} from "./prices.js?v=2";
+} from "./prices.js?v=3";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
-const BLOCK_HOURS = 4;
 const HOUR_MS = 3600000;
 
-const state = { days: new Map(), selected: null };
+const state = { days: new Map(), selected: null, blockHours: 4 };
 
 const el = {
   tabs: document.getElementById("day-tabs"),
+  slider: document.getElementById("block-slider"),
+  blockValue: document.getElementById("block-value"),
   error: document.getElementById("error"),
   summary: document.getElementById("summary"),
   chart: document.getElementById("chart"),
@@ -65,7 +67,7 @@ function renderTabs() {
 
 function renderSummary(prices) {
   const stats = dayStats(prices);
-  const block = cheapestBlock(prices, BLOCK_HOURS);
+  const block = cheapestBlock(prices, state.blockHours);
   el.summary.innerHTML = "";
 
   const cards = [
@@ -73,7 +75,7 @@ function renderSummary(prices) {
     { label: "Laagste uur", value: `${formatEur(stats.min.price)} · ${formatClock(stats.min.start)}` },
     { label: "Hoogste uur", value: `${formatEur(stats.max.price)} · ${formatClock(stats.max.start)}` },
     {
-      label: `Goedkoopste ${BLOCK_HOURS}-uurs blok`,
+      label: `Goedkoopste ${state.blockHours}-uurs blok`,
       value: block ? `${blockLabel(block, prices)} · gem. ${formatEur(block.avg)}` : "–",
       highlight: true,
     },
@@ -96,8 +98,29 @@ function renderSummary(prices) {
 function renderChart(prices) {
   el.chart.innerHTML = "";
   const stats = dayStats(prices);
-  const block = cheapestBlock(prices, BLOCK_HOURS);
+  const block = cheapestBlock(prices, state.blockHours);
   const span = Math.max(stats.max.price - stats.min.price, 0.0001);
+  const { yMax, step } = niceScale(stats.max.price);
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+
+  const divisions = Math.round(yMax / step);
+  for (let n = 1; n <= divisions; n++) {
+    const value = Number((n * step).toFixed(2));
+    const position = `${(value / yMax) * 100}%`;
+    const line = document.createElement("div");
+    line.className = "gridline";
+    line.style.bottom = position;
+    const label = document.createElement("span");
+    label.className = "gridline-label";
+    label.style.bottom = position;
+    label.textContent = `€${value.toFixed(2).replace(".", ",")}`;
+    bars.append(line, label);
+  }
+
+  const hours = document.createElement("div");
+  hours.className = "hours";
 
   for (let i = 0; i < prices.length; i++) {
     const point = prices[i];
@@ -106,25 +129,30 @@ function renderChart(prices) {
     bar.className = "bar";
     if (block && i >= block.startIndex && i <= block.endIndex) bar.classList.add("in-block");
     if (isCurrentHour(point, state.selected)) bar.classList.add("now");
-    bar.style.setProperty("--height", `${8 + ratio * 92}%`);
+    bar.style.setProperty("--height", `${Math.min(100, Math.max(0, (point.price / yMax) * 100))}%`);
     bar.style.setProperty("--hue", `${120 - ratio * 120}`);
 
     const fill = document.createElement("div");
     fill.className = "bar-fill";
-    const label = document.createElement("div");
-    label.className = "bar-label";
-    label.textContent = formatClock(point.start).slice(0, 2);
     const tooltip = `${formatClock(point.start)} – ${formatClock(point.start + HOUR_MS)}\n${formatEur(point.price)}/kWh`;
     bar.title = tooltip;
     bar.setAttribute("aria-label", tooltip);
-    bar.append(fill, label);
-    el.chart.appendChild(bar);
+    bar.appendChild(fill);
+    bars.appendChild(bar);
+
+    const hour = document.createElement("div");
+    hour.className = "hour-label";
+    hour.textContent = formatClock(point.start).slice(0, 2);
+    hours.appendChild(hour);
   }
+
+  el.chart.append(bars, hours);
 }
 
 function renderEmpty(dayKey) {
   el.summary.innerHTML = "";
   el.chart.innerHTML = "";
+  el.slider.disabled = true;
   el.empty.hidden = false;
   el.empty.textContent = dayKey === localDateKey(Date.now(), TZ)
     ? "Er zijn nog geen prijzen voor vandaag bekend."
@@ -134,6 +162,7 @@ function renderEmpty(dayKey) {
 function render() {
   const prices = state.days.get(state.selected) ?? [];
   el.empty.hidden = true;
+  el.slider.disabled = prices.length === 0;
   if (prices.length === 0) {
     renderEmpty(state.selected);
     return;
@@ -186,6 +215,12 @@ async function load() {
     el.refresh.disabled = false;
   }
 }
+
+el.slider.addEventListener("input", () => {
+  state.blockHours = Number(el.slider.value);
+  el.blockValue.textContent = `${state.blockHours} uur`;
+  render();
+});
 
 el.refresh.addEventListener("click", load);
 load();

@@ -10,6 +10,7 @@ import {
   groupByDay,
   hourLabel,
   localDateKey,
+  niceScale,
   zonedTimeToUtcMs,
 } from "../js/prices.js";
 
@@ -103,4 +104,24 @@ test("cheapestBlock geeft bij gelijkestand het eerste blok", () => {
 
 test("cheapestBlock geeft null bij te weinig uren", () => {
   assert.equal(cheapestBlock([{ start: 0, price: 0.2 }], 4), null);
+});
+
+test("cheapestBlock werkt met een variabele blokduur", () => {
+  const prices = [0.5, 0.1, 0.9, 0.1].map((price, i) => ({
+    start: i * 3600000,
+    price,
+  }));
+  const block = cheapestBlock(prices, 2);
+  assert.equal(block.startIndex, 0);
+  assert.equal(block.endIndex, 1);
+  assert.ok(Math.abs(block.avg - 0.3) < 1e-9);
+  assert.equal(cheapestBlock(prices, 5), null);
+});
+
+test("niceScale kiest een nette y-as boven het maximum", () => {
+  assert.deepEqual(niceScale(0.29), { yMax: 0.3, step: 0.1 });
+  assert.deepEqual(niceScale(0.51), { yMax: 0.75, step: 0.25 });
+  assert.deepEqual(niceScale(0.03), { yMax: 0.04, step: 0.02 });
+  assert.deepEqual(niceScale(1.2), { yMax: 1.25, step: 0.25 });
+  assert.deepEqual(niceScale(4.5), { yMax: 6, step: 2 });
 });

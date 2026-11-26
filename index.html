@@ -18,6 +18,12 @@
 
     <nav id="day-tabs" class="tabs" aria-label="Kies een dag"></nav>
 
+    <div class="block-control">
+      <label for="block-slider">Goedkoopste blok van</label>
+      <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
+      <output id="block-value" for="block-slider">4 uur</output>
+    </div>
+
     <p id="error" class="error" hidden></p>
 
     <section id="summary" class="summary"></section>
@@ -31,6 +37,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=2"></script>
+  <script type="module" src="js/app.js?v=3"></script>
 </body>
 </html>

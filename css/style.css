@@ -143,20 +143,59 @@ h1 {
 
 .chart {
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 260px;
+  flex-direction: column;
   background: var(--surface);
   border-radius: var(--radius);
   padding: 16px 12px 8px;
 }
 
+.bars {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 240px;
+  padding-left: 46px;
+  border-bottom: 1px solid #3a4a66;
+}
+
+.gridline {
+  position: absolute;
+  left: 46px;
+  right: 0;
+  border-top: 1px dashed #2c3a54;
+  pointer-events: none;
+}
+
+.gridline-label {
+  position: absolute;
+  left: 0;
+  width: 38px;
+  text-align: right;
+  transform: translateY(50%);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.hours {
+  display: flex;
+  gap: 4px;
+  padding-left: 46px;
+}
+
+.hour-label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  padding-top: 4px;
+}
+
 .bar {
   flex: 1;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   min-width: 0;
   position: relative;
 }
@@ -176,7 +215,7 @@ h1 {
 .bar.now::after {
   content: "nu";
   position: absolute;
-  top: -4px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.65rem;
@@ -184,11 +223,31 @@ h1 {
   font-weight: 700;
 }
 
-.bar-label {
-  text-align: center;
-  font-size: 0.65rem;
+.block-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+}
+
+.block-control label {
   color: var(--text-dim);
-  padding-top: 4px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.block-control input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.block-control output {
+  font-weight: 600;
+  min-width: 52px;
+  text-align: right;
 }
 
 .footer {
@@ -200,11 +259,11 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .chart {
-    height: 200px;
+  .bars {
+    height: 180px;
   }
 
-  .bar-label {
+  .hour-label {
     font-size: 0.55rem;
   }
 }

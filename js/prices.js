@@ -60,6 +60,19 @@ export function zonedTimeToUtcMs(wall, tz = TZ) {
   return result;
 }
 
+export function niceScale(maxValue) {
+  const steps = [0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 1, 2];
+  for (const step of steps) {
+    const divisions = Math.ceil(maxValue / step - 1e-9);
+    if (divisions >= 2 && divisions <= 5) {
+      return { yMax: Number((divisions * step).toFixed(2)), step };
+    }
+  }
+  const step = 2;
+  const divisions = Math.max(Math.ceil(maxValue / step), 1);
+  return { yMax: divisions * step, step };
+}
+
 export function apiDateRange(fromMs, tillMs) {
   return {
     fromDate: new Date(fromMs).toISOString(),
