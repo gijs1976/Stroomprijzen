@@ -15,7 +15,6 @@ import {
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
 const CHART_HEIGHT = 240;
-const HOURS_ROW_HEIGHT = 20;
 const VISIBLE_HOURS = 24;
 const EBT_KEY = "stroomprijzen.energiebelasting.v3";
 const OPSLAG_KEY = "stroomprijzen.opslag.v3";
@@ -45,6 +44,7 @@ const state = {
 };
 
 let pendingScrollDay = null;
+let pendingScrollBlock = false;
 
 const el = {
   prevDay: document.getElementById("prev-day"),
@@ -211,7 +211,7 @@ function renderChart() {
     const value = Number((n * step).toFixed(2));
     const label = document.createElement("span");
     label.className = "gridline-label";
-    label.style.bottom = `${(value / yMax) * CHART_HEIGHT + HOURS_ROW_HEIGHT}px`;
+    label.style.bottom = `${(value / yMax) * CHART_HEIGHT}px`;
     label.textContent = `€${value.toFixed(2).replace(".", ",")}`;
     yAxis.appendChild(label);
   }
@@ -316,8 +316,18 @@ function renderChart() {
   scroller.addEventListener("pointerup", endDrag);
   scroller.addEventListener("pointercancel", endDrag);
 
-  const targetDay = pendingScrollDay ?? state.selected;
+  const targetDay = pendingScrollDay;
   pendingScrollDay = null;
+  if (pendingScrollBlock && blockStart !== null) {
+    pendingScrollBlock = false;
+    const firstBlockBar = bars.querySelector(".in-block");
+    if (firstBlockBar) {
+      const center = firstBlockBar.offsetLeft + firstBlockBar.offsetWidth / 2;
+      scroller.scrollLeft = center - scroller.clientWidth / 2;
+      return;
+    }
+  }
+  pendingScrollBlock = false;
   if (state.days.has(targetDay)) {
     scroller.scrollLeft = dayStartSlots.get(targetDay) * slotWidth;
   } else if (prevScroll !== null) {
@@ -422,6 +432,7 @@ el.nextDay.addEventListener("click", () => goToDay(1));
 el.slider.addEventListener("input", () => {
   state.blockHours = Number(el.slider.value);
   el.blockValue.textContent = `${state.blockHours} uur`;
+  pendingScrollBlock = true;
   render();
 });
 

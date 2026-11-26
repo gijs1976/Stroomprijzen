@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stroomprijzen vandaag</title>
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
   <main class="app">
@@ -16,6 +16,14 @@
       <button id="refresh" class="refresh" type="button">Vernieuwen</button>
     </header>
 
+    <p id="error" class="error" hidden></p>
+
+    <div class="block-control">
+      <label for="block-slider">Goedkoopste blok van</label>
+      <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
+      <output id="block-value" for="block-slider">4 uur</output>
+    </div>
+
     <nav class="date-nav" aria-label="Kies een datum">
       <button id="prev-day" class="nav-arrow" type="button" aria-label="Een dag terug">◀</button>
       <div class="date-label">
@@ -24,6 +32,12 @@
       </div>
       <button id="next-day" class="nav-arrow" type="button" aria-label="Een dag verder">▶</button>
     </nav>
+
+    <section id="chart" class="chart" role="img" aria-label="Uurprijzen; sleep of swipe horizontaal om van dag te wisselen"></section>
+
+    <section id="now-price" class="now-price" hidden></section>
+
+    <section id="summary" class="summary"></section>
 
     <div class="block-control surcharge-control">
       <div class="surcharge-field">
@@ -36,20 +50,6 @@
       </div>
     </div>
 
-    <p id="error" class="error" hidden></p>
-
-    <section id="now-price" class="now-price" hidden></section>
-
-    <section id="summary" class="summary"></section>
-
-    <div class="block-control">
-      <label for="block-slider">Goedkoopste blok van</label>
-      <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
-      <output id="block-value" for="block-slider">4 uur</output>
-    </div>
-
-    <section id="chart" class="chart" role="img" aria-label="Uurprijzen; sleep of swipe horizontaal om van dag te wisselen"></section>
-
     <p id="empty" class="empty" hidden></p>
 
     <footer class="footer">
@@ -57,6 +57,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=10"></script>
+  <script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>
