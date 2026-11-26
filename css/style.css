@@ -172,7 +172,7 @@ h1 {
 .y-axis {
   position: relative;
   width: 44px;
-  height: 240px;
+  height: 260px;
   flex-shrink: 0;
   border-bottom: 1px solid #3a4a66;
 }
@@ -237,7 +237,7 @@ h1 {
 
 .day-line {
   position: absolute;
-  top: -6px;
+  top: 0;
   bottom: -1px;
   width: 0;
   border-left: 1px dashed #6b7f9e;
@@ -245,20 +245,23 @@ h1 {
   pointer-events: none;
 }
 
-.day-label {
-  position: absolute;
-  top: -22px;
-  left: 4px;
+.days {
+  display: flex;
+  gap: 2px;
+  height: 20px;
+}
+
+.day-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-slot.day-label {
   font-size: 0.72rem;
   font-weight: 600;
-  line-height: 1.2;
   color: var(--text-dim);
-  background: var(--surface);
-  border: 1px solid #3a4a66;
-  border-radius: 4px;
-  padding: 1px 5px;
+  padding: 3px 0 0 3px;
   white-space: nowrap;
-  pointer-events: none;
 }
 
 .hours {

@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=15";
+} from "./prices.js?v=16";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -238,6 +238,9 @@ function renderChart() {
   const hours = document.createElement("div");
   hours.className = "hours";
 
+  const days = document.createElement("div");
+  days.className = "days";
+
   const dayStartSlots = new Map();
   const dayBoundarySlots = [];
   let slotIndex = 0;
@@ -270,11 +273,19 @@ function renderChart() {
         hour.textContent = formatClock(point.start).slice(0, 2);
       }
       hours.appendChild(hour);
+
+      const daySlot = document.createElement("div");
+      daySlot.className = "day-slot";
+      if (slotIndex === dayStartSlots.get(key)) {
+        daySlot.classList.add("day-label");
+        daySlot.textContent = `${key.slice(8, 10)}/${key.slice(5, 7)}`;
+      }
+      days.appendChild(daySlot);
       slotIndex += 1;
     }
   }
 
-  inner.append(bars, hours);
+  inner.append(days, bars, hours);
   scroller.appendChild(inner);
 
   const body = document.createElement("div");
@@ -290,10 +301,6 @@ function renderChart() {
     const line = document.createElement("div");
     line.className = "day-line";
     line.style.left = `${firstBar.offsetLeft - 1}px`;
-    const dateLabel = document.createElement("span");
-    dateLabel.className = "day-label";
-    dateLabel.textContent = `${key.slice(8, 10)}/${key.slice(5, 7)}`;
-    line.appendChild(dateLabel);
     bars.appendChild(line);
   }
 
