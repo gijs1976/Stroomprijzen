@@ -66,32 +66,52 @@ h1 {
   cursor: wait;
 }
 
-.tabs {
+.date-nav {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.tab {
-  background: transparent;
-  color: var(--text-dim);
+.nav-arrow {
+  background: var(--surface-raised);
+  color: var(--text);
   border: 1px solid #3a4a66;
   border-radius: 999px;
-  padding: 8px 20px;
-  font-size: 0.95rem;
+  width: 42px;
+  height: 42px;
+  font-size: 0.9rem;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.tab.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #06232f;
-  font-weight: 600;
+.nav-arrow:hover:not(:disabled) {
+  background: #2b3b56;
 }
 
-.tab:disabled {
-  opacity: 0.4;
+.nav-arrow:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
+}
+
+.date-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.date-chip {
+  background: var(--accent);
+  color: #06232f;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  border-radius: 999px;
+  padding: 3px 10px;
 }
 
 .error {

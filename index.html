@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stroomprijzen vandaag</title>
-  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
   <main class="app">
@@ -16,7 +16,14 @@
       <button id="refresh" class="refresh" type="button">Vernieuwen</button>
     </header>
 
-    <nav id="day-tabs" class="tabs" aria-label="Kies een dag"></nav>
+    <nav class="date-nav" aria-label="Kies een datum">
+      <button id="prev-day" class="nav-arrow" type="button" aria-label="Een dag terug">◀</button>
+      <div class="date-label">
+        <span id="date-text"></span>
+        <span id="date-chip" class="date-chip" hidden></span>
+      </div>
+      <button id="next-day" class="nav-arrow" type="button" aria-label="Een dag verder">▶</button>
+    </nav>
 
     <div class="block-control">
       <label for="block-slider">Goedkoopste blok van</label>
@@ -50,6 +57,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=7"></script>
+  <script type="module" src="js/app.js?v=8"></script>
 </body>
 </html>

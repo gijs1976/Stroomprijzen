@@ -6,7 +6,8 @@ Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
 
 ## Functies
 
-- Uurprijzen voor **vandaag** en **morgen** (tabbladen), all-in inclusief btw.
+- Uurprijzen per dag, all-in inclusief btw, met een **datumnavigator** (◀ ▶)
+  over de beschikbare dagen en een duidelijke **vandaag**-markering.
 - Staafdiagram van alle uren met **y-as schaal** (rasterlijnen in €/kWh) en een
   kleurschaal van groen (goedkoop) naar rood (duur).
 - Actuele uur gemarkeerd met **nu**.

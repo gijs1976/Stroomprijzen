@@ -27,8 +27,18 @@ const state = {
   opslag: 0,
 };
 
+const DATE_LABEL_FORMAT = new Intl.DateTimeFormat("nl-NL", {
+  timeZone: TZ,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
 const el = {
-  tabs: document.getElementById("day-tabs"),
+  prevDay: document.getElementById("prev-day"),
+  nextDay: document.getElementById("next-day"),
+  dateText: document.getElementById("date-text"),
+  dateChip: document.getElementById("date-chip"),
   slider: document.getElementById("block-slider"),
   blockValue: document.getElementById("block-value"),
   ebt: document.getElementById("energiebelasting"),
@@ -62,22 +72,29 @@ function isCurrentHour(point, dayKey) {
     && Date.now() < point.start + HOUR_MS;
 }
 
-function renderTabs() {
+function renderDateNav() {
   const today = localDateKey(Date.now(), TZ);
-  const tomorrow = addDays(today, 1);
-  el.tabs.innerHTML = "";
-  for (const [key, label] of [[today, "Vandaag"], [tomorrow, "Morgen"]]) {
-    const button = document.createElement("button");
-    button.className = "tab" + (key === state.selected ? " active" : "");
-    button.textContent = label;
-    button.disabled = !state.days.has(key);
-    button.addEventListener("click", () => {
-      state.selected = key;
-      renderTabs();
-      render();
-    });
-    el.tabs.appendChild(button);
+  const selected = new Date(`${state.selected}T12:00:00Z`);
+  el.dateText.textContent = DATE_LABEL_FORMAT.format(selected);
+  if (state.selected === today) {
+    el.dateChip.textContent = "vandaag";
+    el.dateChip.hidden = false;
+  } else if (state.selected === addDays(today, 1)) {
+    el.dateChip.textContent = "morgen";
+    el.dateChip.hidden = false;
+  } else {
+    el.dateChip.hidden = true;
   }
+  el.prevDay.disabled = !state.days.has(addDays(state.selected, -1));
+  el.nextDay.disabled = !state.days.has(addDays(state.selected, 1));
+}
+
+function goToDay(delta) {
+  const target = addDays(state.selected, delta);
+  if (!state.days.has(target)) return;
+  state.selected = target;
+  renderDateNav();
+  render();
 }
 
 function renderSummary(prices) {
@@ -171,7 +188,7 @@ function renderEmpty(dayKey) {
   el.empty.hidden = false;
   el.empty.textContent = dayKey === localDateKey(Date.now(), TZ)
     ? "Er zijn nog geen prijzen voor vandaag bekend."
-    : "De prijzen voor morgen zijn nog niet gepubliceerd. EnergyZero publiceert deze meestal in de namiddag.";
+    : "Voor deze datum zijn (nog) geen prijzen beschikbaar.";
 }
 
 function renderNowPrice() {
@@ -223,7 +240,7 @@ async function load() {
   el.refresh.disabled = true;
   try {
     const today = localDateKey(Date.now(), TZ);
-    const from = new Date(zonedTimeToUtcMs(`${today}T00:00:00`, TZ));
+    const from = new Date(zonedTimeToUtcMs(`${addDays(today, -1)}T00:00:00`, TZ));
     const till = new Date(zonedTimeToUtcMs(`${addDays(today, 2)}T00:00:00`, TZ) - 1);
     const { fromDate, tillDate } = apiDateRange(from.getTime(), till.getTime());
     const params = new URLSearchParams({
@@ -243,7 +260,7 @@ async function load() {
     if (!state.days.has(today) && state.days.size > 0) {
       state.selected = [...state.days.keys()][0];
     }
-    renderTabs();
+    renderDateNav();
     render();
     renderUpdated();
   } catch (error) {
@@ -253,6 +270,9 @@ async function load() {
     el.refresh.disabled = false;
   }
 }
+
+el.prevDay.addEventListener("click", () => goToDay(-1));
+el.nextDay.addEventListener("click", () => goToDay(1));
 
 el.slider.addEventListener("input", () => {
   state.blockHours = Number(el.slider.value);
