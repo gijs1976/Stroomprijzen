@@ -11,6 +11,7 @@ import {
   hourLabel,
   localDateKey,
   niceScale,
+  withSurcharge,
   zonedTimeToUtcMs,
 } from "../js/prices.js";
 
@@ -116,6 +117,18 @@ test("cheapestBlock werkt met een variabele blokduur", () => {
   assert.equal(block.endIndex, 1);
   assert.ok(Math.abs(block.avg - 0.3) < 1e-9);
   assert.equal(cheapestBlock(prices, 5), null);
+});
+
+test("withSurcharge telt de opslag bij elke prijs op", () => {
+  const prices = [
+    { start: 0, price: 0.2 },
+    { start: 3600000, price: -0.05 },
+  ];
+  const adjusted = withSurcharge(prices, 0.15);
+  assert.equal(adjusted[0].price, 0.35);
+  assert.equal(adjusted[1].price, 0.1);
+  assert.equal(adjusted[0].start, 0);
+  assert.equal(withSurcharge(prices, 0), prices);
 });
 
 test("niceScale kiest een nette y-as boven het maximum", () => {

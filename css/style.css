@@ -253,6 +253,25 @@ h1 {
   text-align: right;
 }
 
+.block-control input[type="number"] {
+  width: 84px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid #3a4a66;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.surcharge-label {
+  margin-left: auto;
+}
+
+.block-control input[type="number"]:focus {
+  outline: 1px solid var(--accent);
+}
+
 .footer {
   display: flex;
   justify-content: space-between;

@@ -11,6 +11,8 @@ Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
   kleurschaal van groen (goedkoop) naar rood (duur).
 - Actuele uur gemarkeerd met **nu**.
 - **Slider (2–8 uur)** waarmee de duur van het te zoeken blok ingesteld wordt.
+- **Opslag per kWh** die je zelf invult (bijv. de marge van je leverancier);
+  wordt bij alle prijzen opgeteld en bewaard in je browser.
 - Samenvattingskaarten: gemiddelde, laagste uur, hoogste uur en het
   **goedkoopste blok** (start, eind en gemiddelde prijs) — handig om
   bijv. de wasmachine, vaatwasser of laadpaal in te plannen.
@@ -57,5 +59,9 @@ node --test
 
 ## Bron
 
-Prijzen komen van de EnergyZero API en zijn de all-in uurprijzen inclusief btw,
-zoals ook op <https://www.energyzero.nl/energieprijzen> worden getoond.
+Prijzen komen van de EnergyZero API en zijn de all-in uurprijzen inclusief btw
+en energiebelasting, zoals ook op
+<https://www.energyzero.nl/energieprijzen> worden getoond. De opslag of korting
+die jouw leverancier rekent zit daar niet bij in; die kun je zelf invullen bij
+**Opslag per kWh** zodat het overzicht overeenkomt met je jaareindafrekening.
+Netbeheerkosten zitten sowieso niet in de uurprijzen.

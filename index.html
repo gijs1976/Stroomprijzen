@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stroomprijzen vandaag</title>
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
   <main class="app">
@@ -22,6 +22,8 @@
       <label for="block-slider">Goedkoopste blok van</label>
       <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
       <output id="block-value" for="block-slider">4 uur</output>
+      <label class="surcharge-label" for="surcharge" title="Tel hier de opslag van je leverancier op, bv. 0,15 voor 15 cent per kWh">Opslag per kWh</label>
+      <input id="surcharge" type="number" step="0.01" min="-1" max="2" value="0.00" title="Opslag van je leverancier in € per kWh, wordt bij alle prijzen opgeteld">
     </div>
 
     <p id="error" class="error" hidden></p>
@@ -37,6 +39,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=4"></script>
+  <script type="module" src="js/app.js?v=5"></script>
 </body>
 </html>

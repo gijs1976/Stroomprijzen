@@ -101,6 +101,11 @@ export function groupByDay(entries, tz = TZ) {
   return days;
 }
 
+export function withSurcharge(prices, surcharge) {
+  if (!surcharge) return prices;
+  return prices.map((point) => ({ ...point, price: point.price + surcharge }));
+}
+
 export function dayStats(prices) {
   if (prices.length === 0) return null;
   let min = prices[0];

@@ -8,18 +8,22 @@ import {
   hourLabel,
   localDateKey,
   niceScale,
+  withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=3";
+} from "./prices.js?v=5";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
 
-const state = { days: new Map(), selected: null, blockHours: 4 };
+const OPSLAG_KEY = "stroomprijzen.opslag";
+
+const state = { days: new Map(), selected: null, blockHours: 4, surcharge: 0 };
 
 const el = {
   tabs: document.getElementById("day-tabs"),
   slider: document.getElementById("block-slider"),
   blockValue: document.getElementById("block-value"),
+  surcharge: document.getElementById("surcharge"),
   error: document.getElementById("error"),
   summary: document.getElementById("summary"),
   chart: document.getElementById("chart"),
@@ -161,10 +165,11 @@ function renderEmpty(dayKey) {
 }
 
 function render() {
-  const prices = state.days.get(state.selected) ?? [];
+  const raw = state.days.get(state.selected) ?? [];
+  const prices = withSurcharge(raw, state.surcharge);
   el.empty.hidden = true;
-  el.slider.disabled = prices.length === 0;
-  if (prices.length === 0) {
+  el.slider.disabled = raw.length === 0;
+  if (raw.length === 0) {
     renderEmpty(state.selected);
     return;
   }
@@ -223,5 +228,22 @@ el.slider.addEventListener("input", () => {
   render();
 });
 
+el.surcharge.addEventListener("input", () => {
+  state.surcharge = Number(el.surcharge.value) || 0;
+  try {
+    localStorage.setItem(OPSLAG_KEY, String(state.surcharge));
+  } catch {}
+  render();
+});
+
 el.refresh.addEventListener("click", load);
+
+try {
+  const stored = Number(localStorage.getItem(OPSLAG_KEY));
+  if (Number.isFinite(stored) && stored !== 0) {
+    state.surcharge = stored;
+  }
+} catch {}
+el.surcharge.value = state.surcharge.toFixed(2);
+
 load();
