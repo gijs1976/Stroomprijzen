@@ -8,7 +8,7 @@ import {
   hourLabel,
   localDateKey,
   zonedTimeToUtcMs,
-} from "./prices.js";
+} from "./prices.js?v=2";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const BLOCK_HOURS = 4;
