@@ -119,14 +119,14 @@ test("cheapestBlock werkt met een variabele blokduur", () => {
   assert.equal(cheapestBlock(prices, 5), null);
 });
 
-test("withSurcharge telt btw over de opslag op", () => {
+test("withSurcharge telt de opslag (incl. btw) direct op", () => {
   const prices = [
     { start: 0, price: 0.2327193 },
     { start: 3600000, price: 0.189152494 },
   ];
-  const adjusted = withSurcharge(prices, 0.11085);
-  assert.ok(Math.abs(adjusted[0].price - (0.2327193 + 0.11085 * 1.21)) < 1e-9);
-  assert.ok(Math.abs(adjusted[1].price - (0.189152494 + 0.11085 * 1.21)) < 1e-9);
+  const adjusted = withSurcharge(prices, 0.13413);
+  assert.ok(Math.abs(adjusted[0].price - 0.3668493) < 1e-9);
+  assert.ok(Math.abs(adjusted[1].price - 0.323282494) < 1e-9);
   assert.equal(adjusted[0].start, 0);
   assert.equal(withSurcharge(prices, 0), prices);
 });

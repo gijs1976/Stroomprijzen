@@ -11,9 +11,10 @@ Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
   kleurschaal van groen (goedkoop) naar rood (duur).
 - Actuele uur gemarkeerd met **nu**.
 - **Slider (2–8 uur)** waarmee de duur van het te zoeken blok ingesteld wordt.
-- **Energiebelasting en opslag** invulbaar (excl. btw); de app rekent
-  automatisch 21% btw over beide, zodat het overzicht overeenkomt met je
-  jaareindafrekening. De waarden worden bewaard in je browser.
+- **Actuele prijs** in een venstertje boven het overzicht, ververst elke minuut.
+- **Energiebelasting en opslag** invulbaar (inclusief btw), zodat het overzicht
+  overeenkomt met je jaareindafrekening. De waarden worden bewaard in je
+  browser.
 - Samenvattingskaarten: gemiddelde, laagste uur, hoogste uur en het
   **goedkoopste blok** (start, eind en gemiddelde prijs) — handig om
   bijv. de wasmachine, vaatwasser of laadpaal in te plannen.
@@ -62,7 +63,7 @@ node --test
 
 Prijzen komen van de EnergyZero API. Met `inclBtw=true` geeft de API de
 marktprijs × 1,21 terug: alleen btw, **zonder** energiebelasting (geverifieerd
-door de same-hour ratio te controleren). De app telt daarom zelf de
-energiebelasting (standaard €0,11085/kWh, aanpasbaar) en eventuele
-leveranciersopslag op, beide vermenigvuldigd met de btw van 21%. Netbeheerkosten
-zitten sowieso niet in de uurprijzen.
+door de ratio per uur te controleren). De app telt daarom zelf de
+energiebelasting (standaard €0,13413/kWh incl. btw, aanpasbaar) en eventuele
+leveranciersopslag op; vul beide in zoals ze op je afrekening staan (incl.
+btw). Netbeheerkosten zitten sowieso niet in de uurprijzen.

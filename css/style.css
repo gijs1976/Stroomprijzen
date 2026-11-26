@@ -215,7 +215,11 @@ h1 {
   border-radius: 4px;
 }
 
-.bar.now::after {
+.bar-fill {
+  position: relative;
+}
+
+.bar.now .bar-fill::after {
   content: "nu";
   position: absolute;
   top: -16px;
@@ -262,6 +266,14 @@ h1 {
   padding: 6px 8px;
   font-size: 0.95rem;
   text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.block-control input[type="number"]::-webkit-outer-spin-button,
+.block-control input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .block-control input[type="number"]:focus {
@@ -286,6 +298,29 @@ h1 {
   margin-left: auto;
   color: var(--text-dim);
   font-size: 0.75rem;
+}
+
+.now-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  background: linear-gradient(135deg, #14324a, #10222f);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.now-price-label {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.now-price-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .footer {

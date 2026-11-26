@@ -10,14 +10,14 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=6";
+} from "./prices.js?v=7";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
 
-const EBT_KEY = "stroomprijzen.energiebelasting";
-const OPSLAG_KEY = "stroomprijzen.opslag";
-const DEFAULT_EBT = 0.11085;
+const EBT_KEY = "stroomprijzen.energiebelasting.v2";
+const OPSLAG_KEY = "stroomprijzen.opslag.v2";
+const DEFAULT_EBT = 0.13413;
 
 const state = {
   days: new Map(),
@@ -33,6 +33,7 @@ const el = {
   blockValue: document.getElementById("block-value"),
   ebt: document.getElementById("energiebelasting"),
   opslag: document.getElementById("opslag"),
+  nowPrice: document.getElementById("now-price"),
   error: document.getElementById("error"),
   summary: document.getElementById("summary"),
   chart: document.getElementById("chart"),
@@ -173,11 +174,33 @@ function renderEmpty(dayKey) {
     : "De prijzen voor morgen zijn nog niet gepubliceerd. EnergyZero publiceert deze meestal in de namiddag.";
 }
 
+function renderNowPrice() {
+  const today = localDateKey(Date.now(), TZ);
+  const raw = state.days.get(today) ?? [];
+  const now = Date.now();
+  const point = raw.find((p) => now >= p.start && now < p.start + HOUR_MS);
+  if (!point) {
+    el.nowPrice.hidden = true;
+    return;
+  }
+  const price = point.price + state.ebt + state.opslag;
+  el.nowPrice.innerHTML = "";
+  const label = document.createElement("span");
+  label.className = "now-price-label";
+  label.textContent = `Actuele prijs (${formatClock(point.start)} – ${formatClock(point.start + HOUR_MS)})`;
+  const value = document.createElement("span");
+  value.className = "now-price-value";
+  value.textContent = `${formatEur(price)}/kWh`;
+  el.nowPrice.append(label, value);
+  el.nowPrice.hidden = false;
+}
+
 function render() {
   const raw = state.days.get(state.selected) ?? [];
   const prices = withSurcharge(raw, state.ebt + state.opslag);
   el.empty.hidden = true;
   el.slider.disabled = raw.length === 0;
+  renderNowPrice();
   if (raw.length === 0) {
     renderEmpty(state.selected);
     return;
@@ -259,7 +282,7 @@ el.refresh.addEventListener("click", load);
 function readNumber(key, fallback) {
   try {
     const stored = Number(localStorage.getItem(key));
-    if (Number.isFinite(stored) && localStorage.getItem(key) !== null) {
+    if (localStorage.getItem(key) !== null && Number.isFinite(stored)) {
       return stored;
     }
   } catch {}
@@ -270,5 +293,7 @@ state.ebt = readNumber(EBT_KEY, DEFAULT_EBT);
 state.opslag = readNumber(OPSLAG_KEY, 0);
 el.ebt.value = state.ebt.toFixed(5);
 el.opslag.value = state.opslag.toFixed(2);
+
+setInterval(renderNowPrice, 60000);
 
 load();

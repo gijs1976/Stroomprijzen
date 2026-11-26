@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stroomprijzen vandaag</title>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
   <main class="app">
@@ -26,17 +26,18 @@
 
     <div class="block-control surcharge-control">
       <div class="surcharge-field">
-        <label for="energiebelasting">Energiebelasting (€/kWh excl. btw)</label>
-        <input id="energiebelasting" type="number" step="0.00001" min="0" max="1" value="0.11085" title="Energiebelasting per kWh excl. btw; btw (21%) wordt automatisch opgeteld">
+        <label for="energiebelasting">Energiebelasting (€/kWh incl. btw)</label>
+        <input id="energiebelasting" type="number" step="0.00001" min="0" max="1.5" value="0.13413" title="Energiebelasting per kWh inclusief 21% btw">
       </div>
       <div class="surcharge-field">
-        <label for="opslag">Opslag leverancier (€/kWh excl. btw)</label>
-        <input id="opslag" type="number" step="0.00001" min="-1" max="2" value="0.00" title="Opslag of korting van je leverancier per kWh excl. btw; kan negatief">
+        <label for="opslag">Opslag leverancier (€/kWh incl. btw)</label>
+        <input id="opslag" type="number" step="0.00001" min="-2" max="5" value="0.00" title="Opslag of korting van je leverancier per kWh inclusief 21% btw; kan negatief">
       </div>
-      <span class="vat-note">incl. 21% btw over belasting en opslag</span>
     </div>
 
     <p id="error" class="error" hidden></p>
+
+    <section id="now-price" class="now-price" hidden></section>
 
     <section id="summary" class="summary"></section>
 
@@ -49,6 +50,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=6"></script>
+  <script type="module" src="js/app.js?v=7"></script>
 </body>
 </html>
