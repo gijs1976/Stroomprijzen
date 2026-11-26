@@ -60,6 +60,13 @@ export function zonedTimeToUtcMs(wall, tz = TZ) {
   return result;
 }
 
+export function apiDateRange(fromMs, tillMs) {
+  return {
+    fromDate: new Date(fromMs).toISOString(),
+    tillDate: new Date(tillMs).toISOString().replace(/000Z$/, "999Z"),
+  };
+}
+
 export function addDays(dateKey, days) {
   const [year, month, day] = dateKey.split("-").map(Number);
   const shifted = new Date(Date.UTC(year, month - 1, day + days));

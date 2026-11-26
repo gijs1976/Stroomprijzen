@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   TZ,
   addDays,
+  apiDateRange,
   cheapestBlock,
   dayStats,
   groupByDay,
@@ -54,6 +55,16 @@ test("groupByDay verdeelt 48 uurprijzen over twee dagen", () => {
   assert.deepEqual([...days.keys()], ["2026-11-27", "2026-11-28"]);
   assert.equal(days.get("2026-11-27").length, 24);
   assert.equal(days.get("2026-11-27")[0].price, 0.2);
+});
+
+test("apiDateRange bouwt geldige ISO-tijdstempels", () => {
+  const from = Date.parse("2026-11-26T23:00:00Z");
+  const till = Date.parse("2026-11-28T22:59:59.999Z");
+  const range = apiDateRange(from, till);
+  assert.equal(range.fromDate, "2026-11-26T23:00:00.000Z");
+  assert.equal(range.tillDate, "2026-11-28T22:59:59.999Z");
+  assert.match(range.fromDate, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.match(range.tillDate, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
 });
 
 test("dayStats berekent minimum, maximum en gemiddelde", () => {

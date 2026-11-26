@@ -1,6 +1,7 @@
 import {
   TZ,
   addDays,
+  apiDateRange,
   cheapestBlock,
   dayStats,
   groupByDay,
@@ -157,9 +158,10 @@ async function load() {
     const today = localDateKey(Date.now(), TZ);
     const from = new Date(zonedTimeToUtcMs(`${today}T00:00:00`, TZ));
     const till = new Date(zonedTimeToUtcMs(`${addDays(today, 2)}T00:00:00`, TZ) - 1);
+    const { fromDate, tillDate } = apiDateRange(from.getTime(), till.getTime());
     const params = new URLSearchParams({
-      fromDate: `${from.toISOString().slice(0, -1)}.000Z`,
-      tillDate: `${till.toISOString().slice(0, -1)}.999Z`,
+      fromDate,
+      tillDate,
       interval: "4",
       usageType: "1",
       inclBtw: "true",
