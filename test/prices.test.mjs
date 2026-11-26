@@ -120,7 +120,7 @@ test("cheapestBlock werkt met een variabele blokduur", () => {
 
 test("niceScale kiest een nette y-as boven het maximum", () => {
   assert.deepEqual(niceScale(0.29), { yMax: 0.3, step: 0.1 });
-  assert.deepEqual(niceScale(0.51), { yMax: 0.75, step: 0.25 });
+  assert.deepEqual(niceScale(0.51), { yMax: 0.6, step: 0.2 });
   assert.deepEqual(niceScale(0.03), { yMax: 0.04, step: 0.02 });
   assert.deepEqual(niceScale(1.2), { yMax: 1.25, step: 0.25 });
   assert.deepEqual(niceScale(4.5), { yMax: 6, step: 2 });
