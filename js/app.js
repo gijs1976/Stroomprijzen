@@ -10,20 +10,29 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=5";
+} from "./prices.js?v=6";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
 
+const EBT_KEY = "stroomprijzen.energiebelasting";
 const OPSLAG_KEY = "stroomprijzen.opslag";
+const DEFAULT_EBT = 0.11085;
 
-const state = { days: new Map(), selected: null, blockHours: 4, surcharge: 0 };
+const state = {
+  days: new Map(),
+  selected: null,
+  blockHours: 4,
+  ebt: DEFAULT_EBT,
+  opslag: 0,
+};
 
 const el = {
   tabs: document.getElementById("day-tabs"),
   slider: document.getElementById("block-slider"),
   blockValue: document.getElementById("block-value"),
-  surcharge: document.getElementById("surcharge"),
+  ebt: document.getElementById("energiebelasting"),
+  opslag: document.getElementById("opslag"),
   error: document.getElementById("error"),
   summary: document.getElementById("summary"),
   chart: document.getElementById("chart"),
@@ -166,7 +175,7 @@ function renderEmpty(dayKey) {
 
 function render() {
   const raw = state.days.get(state.selected) ?? [];
-  const prices = withSurcharge(raw, state.surcharge);
+  const prices = withSurcharge(raw, state.ebt + state.opslag);
   el.empty.hidden = true;
   el.slider.disabled = raw.length === 0;
   if (raw.length === 0) {
@@ -228,22 +237,38 @@ el.slider.addEventListener("input", () => {
   render();
 });
 
-el.surcharge.addEventListener("input", () => {
-  state.surcharge = Number(el.surcharge.value) || 0;
+el.ebt.addEventListener("input", () => {
+  state.ebt = Number(el.ebt.value);
+  if (!Number.isFinite(state.ebt)) state.ebt = 0;
   try {
-    localStorage.setItem(OPSLAG_KEY, String(state.surcharge));
+    localStorage.setItem(EBT_KEY, String(state.ebt));
+  } catch {}
+  render();
+});
+
+el.opslag.addEventListener("input", () => {
+  state.opslag = Number(el.opslag.value) || 0;
+  try {
+    localStorage.setItem(OPSLAG_KEY, String(state.opslag));
   } catch {}
   render();
 });
 
 el.refresh.addEventListener("click", load);
 
-try {
-  const stored = Number(localStorage.getItem(OPSLAG_KEY));
-  if (Number.isFinite(stored) && stored !== 0) {
-    state.surcharge = stored;
-  }
-} catch {}
-el.surcharge.value = state.surcharge.toFixed(2);
+function readNumber(key, fallback) {
+  try {
+    const stored = Number(localStorage.getItem(key));
+    if (Number.isFinite(stored) && localStorage.getItem(key) !== null) {
+      return stored;
+    }
+  } catch {}
+  return fallback;
+}
+
+state.ebt = readNumber(EBT_KEY, DEFAULT_EBT);
+state.opslag = readNumber(OPSLAG_KEY, 0);
+el.ebt.value = state.ebt.toFixed(5);
+el.opslag.value = state.opslag.toFixed(2);
 
 load();

@@ -101,9 +101,14 @@ export function groupByDay(entries, tz = TZ) {
   return days;
 }
 
+export const VAT_RATE = 1.21;
+
 export function withSurcharge(prices, surcharge) {
   if (!surcharge) return prices;
-  return prices.map((point) => ({ ...point, price: point.price + surcharge }));
+  return prices.map((point) => ({
+    ...point,
+    price: point.price + surcharge * VAT_RATE,
+  }));
 }
 
 export function dayStats(prices) {

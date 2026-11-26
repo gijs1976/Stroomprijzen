@@ -254,7 +254,7 @@ h1 {
 }
 
 .block-control input[type="number"] {
-  width: 84px;
+  width: 96px;
   background: var(--bg);
   color: var(--text);
   border: 1px solid #3a4a66;
@@ -264,12 +264,28 @@ h1 {
   text-align: right;
 }
 
-.surcharge-label {
-  margin-left: auto;
-}
-
 .block-control input[type="number"]:focus {
   outline: 1px solid var(--accent);
+}
+
+.surcharge-control {
+  flex-wrap: wrap;
+}
+
+.surcharge-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.surcharge-field label {
+  font-size: 0.8rem;
+}
+
+.vat-note {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 0.75rem;
 }
 
 .footer {
