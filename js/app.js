@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=13";
+} from "./prices.js?v=14";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
