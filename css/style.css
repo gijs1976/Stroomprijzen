@@ -245,14 +245,13 @@ h1 {
   pointer-events: none;
 }
 
-.day-line::after {
-  content: "0:00";
+.day-label {
   position: absolute;
   top: -22px;
   left: 4px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--text-dim);
   background: var(--surface);
   border: 1px solid #3a4a66;

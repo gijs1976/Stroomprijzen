@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=14";
+} from "./prices.js?v=15";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -243,7 +243,7 @@ function renderChart() {
   let slotIndex = 0;
   for (const key of keys) {
     dayStartSlots.set(key, slotIndex);
-    if (slotIndex > 0) dayBoundarySlots.push(slotIndex);
+    if (slotIndex > 0) dayBoundarySlots.push({ key, slot: slotIndex });
     for (const point of state.days.get(key)) {
       const adjusted = point.price + state.ebt + state.opslag;
       const ratio = (point.price - minPrice) / span;
@@ -284,12 +284,16 @@ function renderChart() {
 
   const slotWidth = scroller.scrollWidth / totalSlots;
 
-  for (const slot of dayBoundarySlots) {
+  for (const { key, slot } of dayBoundarySlots) {
     const firstBar = bars.children[divisions + slot];
     if (!firstBar) continue;
     const line = document.createElement("div");
     line.className = "day-line";
     line.style.left = `${firstBar.offsetLeft - 1}px`;
+    const dateLabel = document.createElement("span");
+    dateLabel.className = "day-label";
+    dateLabel.textContent = `${key.slice(8, 10)}/${key.slice(5, 7)}`;
+    line.appendChild(dateLabel);
     bars.appendChild(line);
   }
 
