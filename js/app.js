@@ -59,6 +59,7 @@ function renderTabs() {
     button.disabled = !state.days.has(key);
     button.addEventListener("click", () => {
       state.selected = key;
+      renderTabs();
       render();
     });
     el.tabs.appendChild(button);
