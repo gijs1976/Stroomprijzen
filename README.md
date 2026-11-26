@@ -14,6 +14,11 @@ Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
   bijv. de wasmachine, vaatwasser of laadpaal in te plannen.
 - Duidelijke melding als de prijzen van morgen nog niet gepubliceerd zijn.
 
+## Live
+
+De app staat online via GitHub Pages:
+<https://gijs1976.github.io/Stroomprijzen/>.
+
 ## Gebruik
 
 De app is een statische pagina zonder dependencies en build-stap. Omdat de
