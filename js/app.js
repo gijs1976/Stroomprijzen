@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=12";
+} from "./prices.js?v=13";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -123,6 +123,9 @@ function renderDateNav() {
     el.dateChip.hidden = false;
   } else if (state.selected === addDays(today, 1)) {
     el.dateChip.textContent = "morgen";
+    el.dateChip.hidden = false;
+  } else if (state.selected === addDays(today, -1)) {
+    el.dateChip.textContent = "gisteren";
     el.dateChip.hidden = false;
   } else {
     el.dateChip.hidden = true;
