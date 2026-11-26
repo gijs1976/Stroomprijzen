@@ -15,16 +15,17 @@ import {
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
 
-const EBT_KEY = "stroomprijzen.energiebelasting.v2";
-const OPSLAG_KEY = "stroomprijzen.opslag.v2";
-const DEFAULT_EBT = 0.13413;
+const EBT_KEY = "stroomprijzen.energiebelasting.v3";
+const OPSLAG_KEY = "stroomprijzen.opslag.v3";
+const DEFAULT_EBT = 0.11085;
+const DEFAULT_OPSLAG = 0.02;
 
 const state = {
   days: new Map(),
   selected: null,
   blockHours: 4,
   ebt: DEFAULT_EBT,
-  opslag: 0,
+  opslag: DEFAULT_OPSLAG,
 };
 
 const DATE_LABEL_FORMAT = new Intl.DateTimeFormat("nl-NL", {
@@ -310,7 +311,7 @@ function readNumber(key, fallback) {
 }
 
 state.ebt = readNumber(EBT_KEY, DEFAULT_EBT);
-state.opslag = readNumber(OPSLAG_KEY, 0);
+state.opslag = readNumber(OPSLAG_KEY, DEFAULT_OPSLAG);
 el.ebt.value = state.ebt.toFixed(5);
 el.opslag.value = state.opslag.toFixed(2);
 
