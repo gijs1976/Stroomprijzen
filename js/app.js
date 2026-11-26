@@ -14,11 +14,27 @@ import {
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
-
+const CHART_HEIGHT = 240;
+const HOURS_ROW_HEIGHT = 20;
+const VISIBLE_HOURS = 24;
 const EBT_KEY = "stroomprijzen.energiebelasting.v3";
 const OPSLAG_KEY = "stroomprijzen.opslag.v3";
 const DEFAULT_EBT = 0.11085;
 const DEFAULT_OPSLAG = 0.02;
+
+const DATE_LABEL_FORMAT = new Intl.DateTimeFormat("nl-NL", {
+  timeZone: TZ,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+const DATE_SHORT_FORMAT = new Intl.DateTimeFormat("nl-NL", {
+  timeZone: TZ,
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
 
 const state = {
   days: new Map(),
@@ -28,12 +44,7 @@ const state = {
   opslag: DEFAULT_OPSLAG,
 };
 
-const DATE_LABEL_FORMAT = new Intl.DateTimeFormat("nl-NL", {
-  timeZone: TZ,
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-});
+let pendingScrollDay = null;
 
 const el = {
   prevDay: document.getElementById("prev-day"),
@@ -53,6 +64,14 @@ const el = {
   refresh: document.getElementById("refresh"),
 };
 
+function dayKeys() {
+  return [...state.days.keys()].sort();
+}
+
+function adjustedPrices(dayKey) {
+  return withSurcharge(state.days.get(dayKey) ?? [], state.ebt + state.opslag);
+}
+
 function formatEur(value) {
   return `€${value.toFixed(3).replace(".", ",")}`;
 }
@@ -61,22 +80,44 @@ function formatClock(utcMs) {
   return hourLabel(utcMs, TZ);
 }
 
-function blockLabel(block, prices) {
-  const start = prices[block.startIndex].start;
-  const end = prices[block.endIndex].start + HOUR_MS;
-  return `${formatClock(start)} – ${formatClock(end)}`;
+function dayPrefix(dayKey) {
+  const today = localDateKey(Date.now(), TZ);
+  if (dayKey === state.selected) return "";
+  if (dayKey === today) return "vandaag ";
+  if (dayKey === addDays(today, 1)) return "morgen ";
+  if (dayKey === addDays(today, -1)) return "gisteren ";
+  return `${DATE_SHORT_FORMAT.format(new Date(`${dayKey}T12:00:00Z`))} `;
 }
 
 function isCurrentHour(point, dayKey) {
-  return dayKey === localDateKey(Date.now(), TZ)
-    && Date.now() >= point.start
-    && Date.now() < point.start + HOUR_MS;
+  const now = Date.now();
+  return dayKey === localDateKey(now, TZ)
+    && now >= point.start
+    && now < point.start + HOUR_MS;
+}
+
+function findCheapestBlock() {
+  const today = localDateKey(Date.now(), TZ);
+  const now = Date.now();
+  const series = [];
+  for (const key of dayKeys()) {
+    if (key < today) continue;
+    for (const point of state.days.get(key)) {
+      if (point.start + HOUR_MS > now) {
+        series.push({
+          start: point.start,
+          price: point.price + state.ebt + state.opslag,
+        });
+      }
+    }
+  }
+  series.sort((a, b) => a.start - b.start);
+  return cheapestBlock(series, state.blockHours);
 }
 
 function renderDateNav() {
   const today = localDateKey(Date.now(), TZ);
-  const selected = new Date(`${state.selected}T12:00:00Z`);
-  el.dateText.textContent = DATE_LABEL_FORMAT.format(selected);
+  el.dateText.textContent = DATE_LABEL_FORMAT.format(new Date(`${state.selected}T12:00:00Z`));
   if (state.selected === today) {
     el.dateChip.textContent = "vandaag";
     el.dateChip.hidden = false;
@@ -94,22 +135,32 @@ function goToDay(delta) {
   const target = addDays(state.selected, delta);
   if (!state.days.has(target)) return;
   state.selected = target;
+  pendingScrollDay = target;
   renderDateNav();
   render();
 }
 
 function renderSummary(prices) {
   const stats = dayStats(prices);
-  const block = cheapestBlock(prices, state.blockHours);
+  const block = findCheapestBlock();
   el.summary.innerHTML = "";
+
+  let blockValue = "–";
+  if (block) {
+    const blockStart = block.start;
+    const blockEnd = blockStart + state.blockHours * HOUR_MS;
+    blockValue = `${dayPrefix(localDateKey(blockStart, TZ))}`
+      + `${formatClock(blockStart)} – ${formatClock(blockEnd)}`
+      + ` · gem. ${formatEur(block.avg)}`;
+  }
 
   const cards = [
     { label: "Gemiddeld", value: formatEur(stats.avg) },
     { label: "Laagste uur", value: `${formatEur(stats.min.price)} · ${formatClock(stats.min.start)}` },
     { label: "Hoogste uur", value: `${formatEur(stats.max.price)} · ${formatClock(stats.max.start)}` },
     {
-      label: `Goedkoopste ${state.blockHours}-uurs blok`,
-      value: block ? `${blockLabel(block, prices)} · gem. ${formatEur(block.avg)}` : "–",
+      label: `Goedkoopste ${state.blockHours}-uurs blok (vanaf nu)`,
+      value: blockValue,
       highlight: true,
     },
   ];
@@ -128,58 +179,150 @@ function renderSummary(prices) {
   }
 }
 
-function renderChart(prices) {
+function renderChart() {
+  const prevScroller = el.chart.querySelector(".scroller");
+  const prevScroll = prevScroller ? prevScroller.scrollLeft : null;
+
   el.chart.innerHTML = "";
-  const stats = dayStats(prices);
-  const block = cheapestBlock(prices, state.blockHours);
-  const span = Math.max(stats.max.price - stats.min.price, 0.0001);
-  const { yMax, step } = niceScale(stats.max.price);
+  const keys = dayKeys();
+  if (keys.length === 0) return;
 
-  const bars = document.createElement("div");
-  bars.className = "bars";
+  const block = findCheapestBlock();
+  const blockStart = block ? block.start : null;
+  const blockEnd = block ? blockStart + state.blockHours * HOUR_MS : null;
 
+  let maxPrice = 0;
+  let minPrice = Infinity;
+  let totalSlots = 0;
+  for (const key of keys) {
+    for (const point of state.days.get(key)) {
+      maxPrice = Math.max(maxPrice, point.price);
+      minPrice = Math.min(minPrice, point.price);
+      totalSlots += 1;
+    }
+  }
+  const { yMax, step } = niceScale(maxPrice);
+  const span = Math.max(maxPrice - minPrice, 0.0001);
+
+  const yAxis = document.createElement("div");
+  yAxis.className = "y-axis";
   const divisions = Math.round(yMax / step);
   for (let n = 1; n <= divisions; n++) {
     const value = Number((n * step).toFixed(2));
-    const position = `${(value / yMax) * 100}%`;
-    const line = document.createElement("div");
-    line.className = "gridline";
-    line.style.bottom = position;
     const label = document.createElement("span");
     label.className = "gridline-label";
-    label.style.bottom = position;
+    label.style.bottom = `${(value / yMax) * CHART_HEIGHT + HOURS_ROW_HEIGHT}px`;
     label.textContent = `€${value.toFixed(2).replace(".", ",")}`;
-    bars.append(line, label);
+    yAxis.appendChild(label);
+  }
+
+  const scroller = document.createElement("div");
+  scroller.className = "scroller";
+  const inner = document.createElement("div");
+  inner.className = "chart-inner";
+  inner.style.width = `${(totalSlots / VISIBLE_HOURS) * 100}%`;
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  for (let n = 1; n <= divisions; n++) {
+    const value = Number((n * step).toFixed(2));
+    const line = document.createElement("div");
+    line.className = "gridline";
+    line.style.bottom = `${(value / yMax) * 100}%`;
+    bars.appendChild(line);
   }
 
   const hours = document.createElement("div");
   hours.className = "hours";
 
-  for (let i = 0; i < prices.length; i++) {
-    const point = prices[i];
-    const ratio = (point.price - stats.min.price) / span;
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    if (block && i >= block.startIndex && i <= block.endIndex) bar.classList.add("in-block");
-    if (isCurrentHour(point, state.selected)) bar.classList.add("now");
-    bar.style.setProperty("--height", `${Math.min(100, Math.max(0, (point.price / yMax) * 100))}%`);
-    bar.style.setProperty("--hue", `${120 - ratio * 120}`);
+  const dayStartSlots = new Map();
+  let slotIndex = 0;
+  for (const key of keys) {
+    dayStartSlots.set(key, slotIndex);
+    for (const point of state.days.get(key)) {
+      const adjusted = point.price + state.ebt + state.opslag;
+      const ratio = (point.price - minPrice) / span;
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      if (blockStart !== null && point.start >= blockStart && point.start < blockEnd) {
+        bar.classList.add("in-block");
+      }
+      if (isCurrentHour(point, key)) bar.classList.add("now");
+      bar.style.setProperty("--height", `${Math.min(100, Math.max(0, (adjusted / yMax) * 100))}%`);
+      bar.style.setProperty("--hue", `${120 - ratio * 120}`);
 
-    const fill = document.createElement("div");
-    fill.className = "bar-fill";
-    const tooltip = `${formatClock(point.start)} – ${formatClock(point.start + HOUR_MS)}\n${formatEur(point.price)}/kWh`;
-    bar.title = tooltip;
-    bar.setAttribute("aria-label", tooltip);
-    bar.appendChild(fill);
-    bars.appendChild(bar);
+      const fill = document.createElement("div");
+      fill.className = "bar-fill";
+      const tooltip = `${formatClock(point.start)} – ${formatClock(point.start + HOUR_MS)}\n${formatEur(adjusted)}/kWh`;
+      bar.title = tooltip;
+      bar.setAttribute("aria-label", tooltip);
+      bar.appendChild(fill);
+      bars.appendChild(bar);
 
-    const hour = document.createElement("div");
-    hour.className = "hour-label";
-    hour.textContent = formatClock(point.start).slice(0, 2);
-    hours.appendChild(hour);
+      const hour = document.createElement("div");
+      hour.className = "hour-label";
+      if ((point.start / 60000) % 60 === 0) {
+        hour.textContent = formatClock(point.start).slice(0, 2);
+      }
+      hours.appendChild(hour);
+      slotIndex += 1;
+    }
   }
 
-  el.chart.append(bars, hours);
+  inner.append(bars, hours);
+  scroller.appendChild(inner);
+
+  const body = document.createElement("div");
+  body.className = "chart-body";
+  body.appendChild(scroller);
+  el.chart.append(yAxis, body);
+
+  const slotWidth = scroller.scrollWidth / totalSlots;
+
+  const syncSelectedDay = () => {
+    const firstSlot = Math.round(scroller.scrollLeft / slotWidth);
+    let current = keys[0];
+    for (const key of keys) {
+      if (dayStartSlots.get(key) <= firstSlot) current = key;
+    }
+    if (current !== state.selected) {
+      state.selected = current;
+      renderDateNav();
+      renderSummary(adjustedPrices(current));
+    }
+  };
+
+  let scrollTimer = null;
+  scroller.addEventListener("scroll", () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(syncSelectedDay, 150);
+  });
+
+  let drag = null;
+  scroller.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "touch" || event.button !== 0) return;
+    drag = { x: event.clientX, scroll: scroller.scrollLeft };
+    scroller.setPointerCapture(event.pointerId);
+    scroller.classList.add("dragging");
+  });
+  scroller.addEventListener("pointermove", (event) => {
+    if (!drag) return;
+    scroller.scrollLeft = drag.scroll - (event.clientX - drag.x);
+  });
+  const endDrag = () => {
+    drag = null;
+    scroller.classList.remove("dragging");
+  };
+  scroller.addEventListener("pointerup", endDrag);
+  scroller.addEventListener("pointercancel", endDrag);
+
+  const targetDay = pendingScrollDay ?? state.selected;
+  pendingScrollDay = null;
+  if (state.days.has(targetDay)) {
+    scroller.scrollLeft = dayStartSlots.get(targetDay) * slotWidth;
+  } else if (prevScroll !== null) {
+    scroller.scrollLeft = prevScroll;
+  }
 }
 
 function renderEmpty(dayKey) {
@@ -224,7 +367,7 @@ function render() {
     return;
   }
   renderSummary(prices);
-  renderChart(prices);
+  renderChart();
 }
 
 function renderUpdated() {
@@ -259,8 +402,9 @@ async function load() {
     state.days = groupByDay(data.Prices ?? [], TZ);
     state.selected = state.selected ?? today;
     if (!state.days.has(today) && state.days.size > 0) {
-      state.selected = [...state.days.keys()][0];
+      state.selected = dayKeys().at(-1);
     }
+    pendingScrollDay = state.selected;
     renderDateNav();
     render();
     renderUpdated();
@@ -302,9 +446,9 @@ el.refresh.addEventListener("click", load);
 
 function readNumber(key, fallback) {
   try {
-    const stored = Number(localStorage.getItem(key));
-    if (localStorage.getItem(key) !== null && Number.isFinite(stored)) {
-      return stored;
+    if (localStorage.getItem(key) !== null) {
+      const stored = Number(localStorage.getItem(key));
+      if (Number.isFinite(stored)) return stored;
     }
   } catch {}
   return fallback;

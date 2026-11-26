@@ -2,23 +2,26 @@
 
 Dagoverzicht van dynamische stroomprijzen (Nederland) via de publieke
 [EnergyZero API](https://api.energyzero.nl), met het goedkoopste aaneengesloten
-4-uurs blok van de dag.
+blok (duur instelbaar) over vandaag en morgen.
 
 ## Functies
 
 - Uurprijzen per dag, all-in inclusief btw, met een **datumnavigator** (◀ ▶)
   over de beschikbare dagen en een duidelijke **vandaag**-markering.
-- Staafdiagram van alle uren met **y-as schaal** (rasterlijnen in €/kWh) en een
-  kleurschaal van groen (goedkoop) naar rood (duur).
+- **Verschuifbare tijdlijn** van gisteren t/m morgen: altijd 24 uur in beeld;
+  sleep met de muis of swipe op een telefoon, de datumpijlen centreren
+  gisteren, vandaag of morgen.
+- Staafdiagram met **y-as schaal** (rasterlijnen in €/kWh) en een kleurschaal
+  van groen (goedkoop) naar rood (duur).
 - Actuele uur gemarkeerd met **nu**.
 - **Slider (2–8 uur)** waarmee de duur van het te zoeken blok ingesteld wordt.
 - **Actuele prijs** in een venstertje boven het overzicht, ververst elke minuut.
 - **Energiebelasting en opslag** invulbaar (inclusief btw), zodat het overzicht
   overeenkomt met je jaareindafrekening. De waarden worden bewaard in je
   browser.
-- Samenvattingskaarten: gemiddelde, laagste uur, hoogste uur en het
-  **goedkoopste blok** (start, eind en gemiddelde prijs) — handig om
-  bijv. de wasmachine, vaatwasser of laadpaal in te plannen.
+- Samenvattingskaarten: gemiddelde, laagste uur, hoogste uur van de gekozen dag
+  en het **goedkoopste blok** over vandaag en morgen vanaf het huidige uur
+  (start, eind en gemiddelde prijs).
 - Duidelijke melding als de prijzen van morgen nog niet gepubliceerd zijn.
 
 ## Live

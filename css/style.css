@@ -163,34 +163,24 @@ h1 {
 
 .chart {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
   background: var(--surface);
   border-radius: var(--radius);
   padding: 16px 12px 8px;
 }
 
-.bars {
+.y-axis {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
+  width: 44px;
   height: 240px;
-  padding-left: 46px;
+  flex-shrink: 0;
   border-bottom: 1px solid #3a4a66;
-}
-
-.gridline {
-  position: absolute;
-  left: 46px;
-  right: 0;
-  border-top: 1px dashed #2c3a54;
-  pointer-events: none;
 }
 
 .gridline-label {
   position: absolute;
   left: 0;
-  width: 38px;
+  width: 40px;
   text-align: right;
   transform: translateY(50%);
   font-size: 0.65rem;
@@ -198,10 +188,57 @@ h1 {
   pointer-events: none;
 }
 
+.chart-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.scroller {
+  overflow-x: auto;
+  cursor: grab;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #3a4a66 transparent;
+}
+
+.scroller.dragging {
+  cursor: grabbing;
+}
+
+.scroller::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background: #3a4a66;
+  border-radius: 3px;
+}
+
+.chart-inner {
+  user-select: none;
+}
+
+.bars {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 240px;
+  border-bottom: 1px solid #3a4a66;
+}
+
+.gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed #2c3a54;
+  pointer-events: none;
+}
+
 .hours {
   display: flex;
-  gap: 4px;
-  padding-left: 46px;
+  gap: 2px;
+  height: 20px;
 }
 
 .hour-label {
@@ -210,7 +247,8 @@ h1 {
   text-align: center;
   font-size: 0.65rem;
   color: var(--text-dim);
-  padding-top: 4px;
+  padding-top: 3px;
+  white-space: nowrap;
 }
 
 .bar {
@@ -352,10 +390,6 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .bars {
-    height: 180px;
-  }
-
   .hour-label {
     font-size: 0.55rem;
   }

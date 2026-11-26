@@ -134,7 +134,12 @@ export function cheapestBlock(prices, blockHours = 4) {
     if (i >= blockHours - 1) {
       const avg = sum / blockHours;
       if (best === null || avg < best.avg) {
-        best = { startIndex: i - blockHours + 1, endIndex: i, avg };
+        best = {
+          startIndex: i - blockHours + 1,
+          endIndex: i,
+          avg,
+          start: prices[i - blockHours + 1].start,
+        };
       }
     }
   }

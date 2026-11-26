@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stroomprijzen vandaag</title>
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
   <main class="app">
@@ -25,12 +25,6 @@
       <button id="next-day" class="nav-arrow" type="button" aria-label="Een dag verder">▶</button>
     </nav>
 
-    <div class="block-control">
-      <label for="block-slider">Goedkoopste blok van</label>
-      <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
-      <output id="block-value" for="block-slider">4 uur</output>
-    </div>
-
     <div class="block-control surcharge-control">
       <div class="surcharge-field">
         <label for="energiebelasting">Energiebelasting (€/kWh incl. btw)</label>
@@ -48,7 +42,13 @@
 
     <section id="summary" class="summary"></section>
 
-    <section id="chart" class="chart" role="img" aria-label="Uurprijzen van de geselecteerde dag"></section>
+    <div class="block-control">
+      <label for="block-slider">Goedkoopste blok van</label>
+      <input id="block-slider" type="range" min="2" max="8" step="1" value="4" aria-label="Duur van het goedkoopste blok in uren">
+      <output id="block-value" for="block-slider">4 uur</output>
+    </div>
+
+    <section id="chart" class="chart" role="img" aria-label="Uurprijzen; sleep of swipe horizontaal om van dag te wisselen"></section>
 
     <p id="empty" class="empty" hidden></p>
 
@@ -57,6 +57,6 @@
       <span id="updated"></span>
     </footer>
   </main>
-  <script type="module" src="js/app.js?v=9"></script>
+  <script type="module" src="js/app.js?v=10"></script>
 </body>
 </html>
