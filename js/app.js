@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=7";
+} from "./prices.js?v=12";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -155,14 +155,14 @@ function renderSummary(prices) {
   }
 
   const cards = [
-    { label: "Gemiddeld", value: formatEur(stats.avg) },
-    { label: "Laagste uur", value: `${formatEur(stats.min.price)} · ${formatClock(stats.min.start)}` },
-    { label: "Hoogste uur", value: `${formatEur(stats.max.price)} · ${formatClock(stats.max.start)}` },
     {
       label: `Goedkoopste ${state.blockHours}-uurs blok (vanaf nu)`,
       value: blockValue,
       highlight: true,
     },
+    { label: "Gemiddeld", value: formatEur(stats.avg) },
+    { label: "Laagste uur", value: `${formatEur(stats.min.price)} · ${formatClock(stats.min.start)}` },
+    { label: "Hoogste uur", value: `${formatEur(stats.max.price)} · ${formatClock(stats.max.start)}` },
   ];
 
   for (const card of cards) {
@@ -236,9 +236,11 @@ function renderChart() {
   hours.className = "hours";
 
   const dayStartSlots = new Map();
+  const dayBoundarySlots = [];
   let slotIndex = 0;
   for (const key of keys) {
     dayStartSlots.set(key, slotIndex);
+    if (slotIndex > 0) dayBoundarySlots.push(slotIndex);
     for (const point of state.days.get(key)) {
       const adjusted = point.price + state.ebt + state.opslag;
       const ratio = (point.price - minPrice) / span;
@@ -278,6 +280,15 @@ function renderChart() {
   el.chart.append(yAxis, body);
 
   const slotWidth = scroller.scrollWidth / totalSlots;
+
+  for (const slot of dayBoundarySlots) {
+    const firstBar = bars.children[divisions + slot];
+    if (!firstBar) continue;
+    const line = document.createElement("div");
+    line.className = "day-line";
+    line.style.left = `${firstBar.offsetLeft - 1}px`;
+    bars.appendChild(line);
+  }
 
   const syncSelectedDay = () => {
     const firstSlot = Math.round(scroller.scrollLeft / slotWidth);
