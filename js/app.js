@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=17";
+} from "./prices.js?v=18";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -57,6 +57,7 @@ const el = {
   opslag: document.getElementById("opslag"),
   nowPrice: document.getElementById("now-price"),
   error: document.getElementById("error"),
+  leapStatus: document.getElementById("leap-status"),
   summary: document.getElementById("summary"),
   chart: document.getElementById("chart"),
   empty: document.getElementById("empty"),
@@ -405,6 +406,49 @@ function render() {
   renderChart();
 }
 
+async function loadLeapStatus() {
+  try {
+    const response = await fetch("leap-status.json", { cache: "no-store" });
+    if (!response.ok) {
+      el.leapStatus.hidden = true;
+      return;
+    }
+    const data = await response.json();
+    renderLeapStatus(data);
+  } catch {
+    el.leapStatus.hidden = true;
+  }
+}
+
+function renderLeapStatus(data) {
+  el.leapStatus.innerHTML = "";
+  const parts = [];
+  parts.push(data.vehicle || "Leapmotor");
+  if (data.soc !== null && data.soc !== undefined) parts.push(`SOC ${Math.round(data.soc)}%`);
+  if (data.rangeKm !== null && data.rangeKm !== undefined) parts.push(`${data.rangeKm} km`);
+  if (data.charging) {
+    parts.push(data.powerKw ? `Laden (${String(data.powerKw).replace(".", ",")} kW)` : "Laden");
+  } else if (data.plugged) {
+    parts.push("Aangesloten");
+  }
+  if (data.updatedAt) {
+    const time = new Intl.DateTimeFormat("nl-NL", {
+      timeZone: TZ,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date(data.updatedAt));
+    parts.push(`bijgewerkt ${time}`);
+  }
+  const text = document.createElement("span");
+  text.className = "leap-text";
+  text.textContent = parts.join(" \u00b7 ");
+  const dot = document.createElement("span");
+  dot.className = "leap-dot";
+  el.leapStatus.append(dot, text);
+  el.leapStatus.hidden = false;
+}
+
 function renderUpdated() {
   el.updated.textContent = `Laatst vernieuwd om ${new Intl.DateTimeFormat("nl-NL", {
     timeZone: TZ,
@@ -496,9 +540,11 @@ el.ebt.value = state.ebt.toFixed(5);
 el.opslag.value = state.opslag.toFixed(2);
 
 setInterval(renderNowPrice, 60000);
+setInterval(loadLeapStatus, 300000);
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js");
 }
 
+loadLeapStatus();
 load();

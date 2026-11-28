@@ -1,0 +1,43 @@
+name: Leapmotor status
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  leapmotor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download Leapmotor app-certificaten
+        run: |
+          mkdir -p certs
+          wget -q https://github.com/markoceri/leapmotor-certs/archive/refs/tags/v1.0.0.zip
+          unzip -q -j v1.0.0.zip "*/app_cert.pem" "*/app_key.pem" -d certs
+
+      - name: Haal voertuigstatus op
+        env:
+          LEAPMOTOR_USERNAME: ${{ secrets.LEAPMOTOR_USERNAME }}
+          LEAPMOTOR_PASSWORD: ${{ secrets.LEAPMOTOR_PASSWORD }}
+        run: python scripts/leapmotor_status.py
+
+      - name: Publiceer status
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain leap-status.json)" ]; then
+            git add leap-status.json
+            git commit -m "Leapmotor status update"
+            git push
+          else
+            echo "Status ongewijzigd; niets te committen"
+          fi
