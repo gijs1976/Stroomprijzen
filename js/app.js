@@ -10,7 +10,7 @@ import {
   niceScale,
   withSurcharge,
   zonedTimeToUtcMs,
-} from "./prices.js?v=16";
+} from "./prices.js?v=17";
 
 const API_URL = "https://api.energyzero.nl/v1/energyprices";
 const HOUR_MS = 3600000;
@@ -496,5 +496,9 @@ el.ebt.value = state.ebt.toFixed(5);
 el.opslag.value = state.opslag.toFixed(2);
 
 setInterval(renderNowPrice, 60000);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
 
 load();

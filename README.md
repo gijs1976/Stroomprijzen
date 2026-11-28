@@ -23,6 +23,9 @@ blok (duur instelbaar) over vandaag en morgen.
   en het **goedkoopste blok** over vandaag en morgen vanaf het huidige uur
   (start, eind en gemiddelde prijs).
 - Duidelijke melding als de prijzen van morgen nog niet gepubliceerd zijn.
+- **Installeerbaar als app (PWA)**: op Android via Chrome-menu "App installeren"
+  of "Toevoegen aan startscherm"; opent daarna fullscreen zonder adresbalk met
+  eigen icoon en werkt offline opgestart.
 
 ## Live
 
